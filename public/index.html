@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Katie's Agent</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#080810; --s1:#0f0f1c; --s2:#161625; --s3:#1e1e30;
+  --b:rgba(255,255,255,.06); --b2:rgba(255,255,255,.12);
+  --purple:#8b7ff5; --p2:#6558d4; --pink:#f472b6;
+  --teal:#2dd4bf; --amber:#fbbf24;
+  --text:#eeeeff; --muted:#6b6b8a; --m2:#9090aa;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+
+/* screens */
+.scr{display:none;min-height:100vh;}
+.scr.on{display:flex;}
+.col{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2rem;padding:2rem;width:100%;}
+
+/* logo */
+.logo{display:flex;align-items:center;gap:.5rem;}
+.dot{width:8px;height:8px;border-radius:50%;}
+.dot.p{background:var(--purple)} .dot.k{background:var(--pink)} .dot.t{background:var(--teal)}
+.logo-lbl{font-family:'Syne',sans-serif;font-size:.7rem;font-weight:700;letter-spacing:.22em;color:var(--m2);text-transform:uppercase;}
+
+/* hero */
+.hero{font-family:'Syne',sans-serif;font-size:clamp(1.9rem,5vw,3rem);font-weight:800;text-align:center;line-height:1.1;}
+.hero em{font-style:normal;background:linear-gradient(135deg,var(--purple),var(--pink));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+
+/* card */
+.card{background:var(--s1);border:1px solid var(--b2);border-radius:20px;padding:2rem;width:100%;max-width:380px;display:flex;flex-direction:column;gap:1rem;}
+.fl{display:flex;flex-direction:column;gap:.4rem;}
+.lbl{font-size:.67rem;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--m2);}
+.inp{background:var(--s2);border:1px solid var(--b2);border-radius:10px;padding:.8rem 1rem;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:.85rem;outline:none;transition:border-color .2s,box-shadow .2s;width:100%;}
+.inp:focus{border-color:var(--purple);box-shadow:0 0 0 3px rgba(139,127,245,.12);}
+.inp::placeholder{color:var(--muted);}
+.btn{background:linear-gradient(135deg,var(--purple),var(--p2));border:none;border-radius:10px;padding:.9rem;color:#fff;font-family:'Syne',sans-serif;font-size:.92rem;font-weight:700;cursor:pointer;transition:opacity .2s,transform .15s;width:100%;}
+.btn:hover{opacity:.9;transform:translateY(-1px);}
+.btn:disabled{opacity:.35;cursor:not-allowed;transform:none;}
+.btn.sm{padding:.5rem 1.1rem;width:auto;font-size:.8rem;border-radius:8px;}
+.btn.ghost{background:var(--s2);border:1px solid var(--b2);color:var(--m2);}
+.btn.ghost:hover{color:var(--text);}
+.err-box{background:rgba(244,114,182,.1);border:1px solid rgba(244,114,182,.25);border-radius:8px;padding:.6rem .9rem;font-size:.79rem;color:var(--pink);display:none;}
+.hint{font-size:.73rem;color:var(--muted);text-align:center;}
+
+/* progress */
+.prog-icon{font-size:2.5rem;animation:pulse 1.5s ease-in-out infinite;}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.7;transform:scale(.93)}}
+.prog-lbl{font-family:'Syne',sans-serif;font-size:1rem;font-weight:700;color:var(--m2);}
+.steps{display:flex;flex-direction:column;gap:.4rem;width:100%;max-width:320px;}
+.step{display:flex;align-items:center;gap:.7rem;padding:.55rem .85rem;border-radius:8px;background:var(--s1);border:1px solid var(--b);font-size:.8rem;color:var(--m2);transition:all .3s;}
+.step.active{border-color:var(--purple);background:rgba(139,127,245,.08);color:var(--text);}
+.step.done{border-color:var(--teal);background:rgba(45,212,191,.05);color:var(--teal);}
+.step-ico{font-size:.82rem;}
+
+/* dashboard */
+#dash{flex-direction:column;}
+.topbar{display:flex;align-items:center;gap:.75rem;padding:.75rem 1.4rem;border-bottom:1px solid var(--b);background:rgba(8,8,16,.93);backdrop-filter:blur(12px);position:sticky;top:0;z-index:100;flex-wrap:wrap;}
+.topbar-logo{font-family:'Syne',sans-serif;font-size:.7rem;font-weight:700;letter-spacing:.15em;color:var(--m2);text-transform:uppercase;}
+.ch-pill{display:flex;align-items:center;gap:.4rem;background:var(--s2);border:1px solid var(--b2);border-radius:20px;padding:.26rem .8rem .26rem .38rem;}
+.ch-pill img{width:20px;height:20px;border-radius:50%;object-fit:cover;}
+.ch-pill span{font-size:.77rem;font-weight:500;}
+.topbar-r{margin-left:auto;display:flex;gap:.35rem;}
+.ibtn{background:var(--s2);border:1px solid var(--b2);border-radius:7px;padding:.32rem .65rem;color:var(--m2);font-size:.72rem;cursor:pointer;font-family:'DM Sans',sans-serif;transition:color .2s;}
+.ibtn:hover{color:var(--text);}
+
+.tabs{display:flex;gap:.1rem;padding:0 1.4rem;border-bottom:1px solid var(--b);background:var(--s1);overflow-x:auto;}
+.tab{padding:.75rem .95rem;font-size:.76rem;font-weight:500;color:var(--m2);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;transition:color .2s,border-color .2s;}
+.tab:hover{color:var(--text);}
+.tab.on{color:var(--purple);border-bottom-color:var(--purple);}
+.pane{display:none;padding:1.5rem;max-width:920px;margin:0 auto;}
+.pane.on{display:block;}
+
+/* stats */
+.sg{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:.75rem;margin-bottom:1.5rem;}
+.sc{background:var(--s1);border:1px solid var(--b);border-radius:12px;padding:1.1rem;display:flex;flex-direction:column;gap:.28rem;transition:border-color .2s,transform .2s;}
+.sc:hover{border-color:var(--b2);transform:translateY(-2px);}
+.sc-lbl{font-size:.63rem;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);}
+.sc-val{font-family:'Syne',sans-serif;font-size:1.75rem;font-weight:800;background:linear-gradient(135deg,var(--purple),var(--pink));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.sc-note{font-size:.67rem;color:var(--m2);}
+
+.two{display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-bottom:1.5rem;}
+@media(max-width:540px){.two{grid-template-columns:1fr;}}
+.ic{background:var(--s1);border:1px solid var(--b);border-radius:12px;padding:1.1rem;}
+.ic-h{font-family:'Syne',sans-serif;font-size:.65rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:.75rem;}
+.ir{display:flex;justify-content:space-between;align-items:center;padding:.38rem 0;border-bottom:1px solid var(--b);font-size:.78rem;}
+.ir:last-child{border-bottom:none;}
+.ir-l{color:var(--m2);}
+.pill{border-radius:20px;padding:.14rem .52rem;font-size:.65rem;font-weight:500;}
+.pill.g{background:rgba(45,212,191,.15);color:var(--teal);}
+.pill.w{background:rgba(251,191,36,.15);color:var(--amber);}
+
+.sec{font-family:'Syne',sans-serif;font-size:.68rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:.75rem;display:flex;align-items:center;gap:.55rem;}
+.sec::after{content:'';flex:1;height:1px;background:var(--b);}
+.vl{display:flex;flex-direction:column;gap:.38rem;margin-bottom:1.5rem;}
+.vi{background:var(--s1);border:1px solid var(--b);border-radius:9px;padding:.72rem .9rem;display:grid;grid-template-columns:22px 1fr auto auto;align-items:center;gap:.75rem;}
+.vi:hover{border-color:var(--b2);}
+.vi-rk{font-family:'Syne',sans-serif;font-size:.67rem;font-weight:700;color:var(--muted);}
+.vi-t{font-size:.79rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.vi-v{font-family:'Syne',sans-serif;font-size:.77rem;font-weight:700;color:var(--purple);white-space:nowrap;}
+.vi-d{font-size:.65rem;color:var(--muted);white-space:nowrap;}
+.desc{background:var(--s2);border-radius:9px;padding:.9rem;font-size:.78rem;color:var(--m2);line-height:1.7;white-space:pre-wrap;word-break:break-word;}
+
+/* ai */
+.ac{background:var(--s1);border:1px solid var(--b);border-radius:13px;overflow:hidden;margin-bottom:1.5rem;}
+.ah{display:flex;align-items:center;gap:.6rem;padding:.8rem 1.1rem;border-bottom:1px solid var(--b);background:var(--s2);}
+.ab-badge{border-radius:5px;padding:.14rem .52rem;font-size:.6rem;font-weight:700;letter-spacing:.08em;color:#fff;text-transform:uppercase;}
+.ab-badge.pu{background:linear-gradient(135deg,var(--purple),var(--p2));}
+.ab-badge.pk{background:linear-gradient(135deg,var(--pink),#c026d3);}
+.ab-badge.tl{background:linear-gradient(135deg,var(--teal),#059669);}
+.ab-badge.am{background:linear-gradient(135deg,var(--amber),#d97706);}
+.ah-title{font-family:'Syne',sans-serif;font-size:.82rem;font-weight:700;}
+.cpbtn{margin-left:auto;background:var(--s3);border:1px solid var(--b2);border-radius:5px;padding:.2rem .55rem;font-size:.65rem;color:var(--m2);cursor:pointer;font-family:'DM Sans',sans-serif;transition:color .2s;}
+.cpbtn:hover{color:var(--text);}
+.ab{padding:1.1rem;font-size:.83rem;line-height:1.78;color:var(--text);min-height:80px;}
+.ab h3{font-family:'Syne',sans-serif;font-size:.86rem;font-weight:700;margin:1rem 0 .38rem;}
+.ab h3:first-child{margin-top:0;}
+.ab ul{padding-left:1.1rem;display:flex;flex-direction:column;gap:.3rem;margin:.3rem 0;}
+.ab li,.ab p{color:var(--m2);}
+.ab strong{color:var(--text);font-weight:500;}
+.ab p{margin-bottom:.5rem;}
+.ab p:last-child{margin-bottom:0;}
+
+/* util */
+.spin{display:inline-block;width:12px;height:12px;border:2px solid rgba(255,255,255,.1);border-top-color:var(--purple);border-radius:50%;animation:sp .7s linear infinite;vertical-align:middle;margin-right:5px;}
+@keyframes sp{to{transform:rotate(360deg)}}
+.cur{display:inline-block;width:2px;height:1em;background:var(--purple);animation:bl .9s step-end infinite;vertical-align:text-bottom;margin-left:1px;}
+@keyframes bl{0%,100%{opacity:1}50%{opacity:0}}
+</style>
+</head>
+<body>
+
+<!-- 로그인 -->
+<div class="scr on" id="login">
+  <div class="col">
+    <div class="logo">
+      <div class="dot p"></div><div class="dot k"></div><div class="dot t"></div>
+      <div class="logo-lbl">Katie's Agent</div>
+    </div>
+    <div class="hero">채널 분석 +<br><em>AI 에이전트</em></div>
+    <div class="card">
+      <div class="fl">
+        <div class="lbl">비밀번호</div>
+        <input class="inp" type="password" id="pw" placeholder="••••••••" />
+      </div>
+      <div class="err-box" id="login-err"></div>
+      <button class="btn" id="login-btn" onclick="doLogin()">입장 →</button>
+      <div class="hint">운영자에게 비밀번호를 받으세요</div>
+    </div>
+  </div>
+</div>
+
+<!-- 진행 -->
+<div class="scr" id="progress">
+  <div class="col">
+    <div class="prog-icon">🎵</div>
+    <div class="prog-lbl">에이전트 실행 중...</div>
+    <div class="steps">
+      <div class="step" id="p1"><span class="step-ico">📡</span> YouTube 채널 데이터 수집</div>
+      <div class="step" id="p2"><span class="step-ico">🎬</span> 인기 영상 분석 (Top 50)</div>
+      <div class="step" id="p3"><span class="step-ico">🧠</span> AI — 채널 인사이트</div>
+      <div class="step" id="p4"><span class="step-ico">🎯</span> AI — 주간 목표 수립</div>
+      <div class="step" id="p5"><span class="step-ico">✍️</span> AI — 쇼츠 스크립트</div>
+      <div class="step" id="p6"><span class="step-ico">📅</span> AI — SNS 스케줄</div>
+    </div>
+  </div>
+</div>
+
+<!-- 대시보드 -->
+<div class="scr" id="dash">
+  <div style="display:flex;flex-direction:column;width:100%;">
+    <div class="topbar">
+      <div class="topbar-logo">Katie's Agent</div>
+      <div class="ch-pill"><img id="bar-img" src="" style="display:none"/><span id="bar-emoji">🎵</span><span id="bar-name">@Katiesingalong</span></div>
+      <div class="topbar-r">
+        <button class="ibtn" onclick="rerun()">🔄 재실행</button>
+        <button class="ibtn" onclick="doLogout()">로그아웃</button>
+      </div>
+    </div>
+    <div class="tabs">
+      <div class="tab on"  onclick="go('t0')">📊 채널 분석</div>
+      <div class="tab"     onclick="go('t1')">🧠 인사이트</div>
+      <div class="tab"     onclick="go('t2')">🎯 주간 목표</div>
+      <div class="tab"     onclick="go('t3')">✍️ 쇼츠 스크립트</div>
+      <div class="tab"     onclick="go('t4')">📅 콘텐츠 스케줄</div>
+    </div>
+
+    <div class="pane on" id="t0">
+      <div class="sg" id="stats"></div>
+      <div class="two">
+        <div class="ic"><div class="ic-h">채널 현황</div><div id="ch-info"></div></div>
+        <div class="ic"><div class="ic-h">성장 지표</div><div id="growth"></div></div>
+      </div>
+      <div class="sec">인기 영상 Top 10</div>
+      <div class="vl" id="vlist"></div>
+      <div class="sec">채널 설명</div>
+      <div class="desc" id="ch-desc"></div>
+    </div>
+
+    <div class="pane" id="t1">
+      <div class="ac"><div class="ah"><div class="ab-badge pu">Claude AI</div><div class="ah-title">채널 종합 인사이트</div><button class="cpbtn" onclick="cp('ai0')">복사</button></div><div class="ab" id="ai0"><span class="spin"></span> 분석 중...</div></div>
+    </div>
+    <div class="pane" id="t2">
+      <div class="ac"><div class="ah"><div class="ab-badge pk">목표 에이전트</div><div class="ah-title">이번 주 KPI & 액션 플랜</div><button class="cpbtn" onclick="cp('ai1')">복사</button></div><div class="ab" id="ai1"><span class="spin"></span> 목표 수립 중...</div></div>
+    </div>
+    <div class="pane" id="t3">
+      <div class="ac"><div class="ah"><div class="ab-badge tl">스크립트 에이전트</div><div class="ah-title">YouTube Shorts 스크립트 3편</div><button class="cpbtn" onclick="cp('ai2')">복사</button></div><div class="ab" id="ai2"><span class="spin"></span> 생성 중...</div></div>
+    </div>
+    <div class="pane" id="t4">
+      <div class="ac"><div class="ah"><div class="ab-badge am">스케줄 에이전트</div><div class="ah-title">주간 콘텐츠 스케줄 + SNS 캡션</div><button class="cpbtn" onclick="cp('ai3')">복사</button></div><div class="ab" id="ai3"><span class="spin"></span> 생성 중...</div></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+const SK='katie_v2_sess';
+const fmt=n=>{n=parseInt(n)||0;if(n>=1e6)return(n/1e6).toFixed(1)+'M';if(n>=1e3)return(n/1e3).toFixed(1)+'K';return n.toLocaleString();};
+const fmtD=iso=>{const d=new Date(iso);return d.getFullYear()+'.'+String(d.getMonth()+1).padStart(2,'0')+'.'+String(d.getDate()).padStart(2,'0');};
+const daysAgo=iso=>Math.floor((Date.now()-new Date(iso))/86400000);
+
+function show(id){document.querySelectorAll('.scr').forEach(s=>s.classList.remove('on'));$(id).classList.add('on');}
+function go(id){
+  document.querySelectorAll('.pane').forEach(p=>p.classList.remove('on'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));
+  $(id).classList.add('on');
+  document.querySelectorAll('.tab')[['t0','t1','t2','t3','t4'].indexOf(id)].classList.add('on');
+}
+function setS(id,s){const e=$(id);if(e)e.className='step '+(s||'');}
+function cp(id){
+  navigator.clipboard.writeText($(id).innerText).then(()=>{
+    const b=$(id).closest('.ac').querySelector('.cpbtn');
+    b.textContent='복사됨 ✓';setTimeout(()=>b.textContent='복사',1500);
+  });
+}
+
+// session
+function getSess(){
+  try{const r=localStorage.getItem(SK);if(!r)return null;const s=JSON.parse(atob(r));if(!s.ok||s.exp<Date.now()){localStorage.removeItem(SK);return null;}return s;}catch{return null;}
+}
+
+async function doLogin(){
+  const pw=$('pw').value.trim();if(!pw)return;
+  $('login-btn').disabled=true;$('login-err').style.display='none';
+  try{
+    const r=await fetch('/api/auth',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({password:pw})});
+    const d=await r.json();if(!r.ok)throw new Error(d.error||'인증 실패');
+    localStorage.setItem(SK,d.token);
+    runAgent();
+  }catch(e){
+    $('login-err').textContent=e.message;$('login-err').style.display='block';
+    $('login-btn').disabled=false;
+  }
+}
+function doLogout(){localStorage.removeItem(SK);location.reload();}
+function rerun(){go('t0');runAgent();}
+
+// markdown
+function md(t){
+  return t.replace(/^###\s+(.+)$/gm,'<h3>$1</h3>').replace(/^##\s+(.+)$/gm,'<h3>$1</h3>')
+    .replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>')
+    .replace(/`(.+?)`/g,'<code style="background:rgba(139,127,245,.15);color:#c4b9ff;padding:.1em .3em;border-radius:3px;font-family:monospace;font-size:.82em">$1</code>')
+    .replace(/^[-•]\s+(.+)$/gm,'<li>$1</li>')
+    .replace(/(<li>.*<\/li>\n?)+/g,m=>'<ul>'+m+'</ul>')
+    .replace(/\n\n/g,'</p><p>').replace(/^(?!<[hul])(.+)$/gm,m=>m.trim()?'<p>'+m+'</p>':'').replace(/<p><\/p>/g,'');
+}
+
+async function stream(task,ctx,tid){
+  const el=$(tid);el.innerHTML='';let acc='';
+  const r=await fetch('/api/claude',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({task,context:ctx})});
+  if(!r.ok){const e=await r.json();throw new Error(e.error||'Claude 오류');}
+  const reader=r.body.getReader();const dec=new TextDecoder();
+  while(true){
+    const{done,value}=await reader.read();if(done)break;
+    const chunk=dec.decode(value);
+    for(const line of chunk.split('\n')){
+      if(!line.startsWith('data: '))continue;
+      const d=line.slice(6).trim();if(d==='[DONE]')continue;
+      try{const j=JSON.parse(d);if(j.type==='content_block_delta'&&j.delta?.text){acc+=j.delta.text;el.innerHTML=md(acc)+'<span class="cur"></span>';}}catch{}
+    }
+  }
+  el.innerHTML=md(acc);
+}
+
+async function runAgent(){
+  show('progress');
+  try{
+    setS('p1','active');
+    const r=await fetch('/api/channel');
+    if(!r.ok){const e=await r.json();throw new Error(e.error||'채널 오류');}
+    const{channel:ch,videos}=await r.json();
+    setS('p1','done');setS('p2','active');
+    renderAnalysis(ch,videos);
+    setS('p2','done');
+    show('dash');
+
+    const sn=ch.snippet,st=ch.statistics;
+    const days=daysAgo(sn.publishedAt);
+    const vc=parseInt(st.videoCount||0),subs=parseInt(st.subscriberCount||0),views=parseInt(st.viewCount||0);
+    const ctx=`채널: ${sn.title} | @Katiesingalong | 어린이 동요/Nursery Rhymes
+개설: ${fmtD(sn.publishedAt)} (${Math.floor(days/365)}년 ${Math.floor((days%365)/30)}개월)
+구독자: ${fmt(subs)} | 총 조회수: ${fmt(views)} | 영상: ${vc}개
+업로드 주기: 약 ${Math.round(days/vc)}일 | 조회/구독 배율: ${(views/(subs||1)).toFixed(1)}x
+인기 Top 10:\n${videos.slice(0,10).map((v,i)=>`${i+1}. "${v.snippet?.title}" — ${fmt(v.statistics?.viewCount)}회`).join('\n')}
+채널 설명: ${(sn.description||'').slice(0,300)}`.trim();
+
+    setS('p3','active');await stream('insight',ctx,'ai0');setS('p3','done');
+    setS('p4','active');await stream('goals',ctx,'ai1');setS('p4','done');
+    setS('p5','active');await stream('scripts',ctx,'ai2');setS('p5','done');
+    setS('p6','active');await stream('schedule',ctx,'ai3');setS('p6','done');
+  }catch(e){alert('오류: '+e.message);show('login');}
+}
+
+function renderAnalysis(ch,videos){
+  const sn=ch.snippet,st=ch.statistics;
+  const days=daysAgo(sn.publishedAt);
+  const vc=parseInt(st.videoCount||0),subs=parseInt(st.subscriberCount||0),views=parseInt(st.viewCount||0);
+  const t10=videos.slice(0,10);
+  const avg=t10.length?Math.round(t10.reduce((a,v)=>a+parseInt(v.statistics.viewCount||0),0)/t10.length):0;
+  const fd=vc?Math.round(days/vc):0;
+
+  const thumb=sn.thumbnails?.medium?.url||sn.thumbnails?.default?.url;
+  if(thumb){const i=$('bar-img');i.src=thumb;i.style.display='block';$('bar-emoji').style.display='none';}
+  $('bar-name').textContent=sn.title;
+
+  $('stats').innerHTML=[['구독자',fmt(subs),''],['총 조회수',fmt(views),''],['영상 수',fmt(vc),''],['Top10 평균',fmt(avg),'조회수'],['조회/구독 배율',(views/(subs||1)).toFixed(1)+'x',''],['운영 기간',Math.floor(days/365)+'년 '+Math.floor((days%365)/30)+'개월','']].map(([l,v,n])=>`<div class="sc"><div class="sc-lbl">${l}</div><div class="sc-val">${v}</div><div class="sc-note">${n}</div></div>`).join('');
+
+  $('ch-info').innerHTML=[['채널 개설일',fmtD(sn.publishedAt)],['업로드 주기','약 '+fd+'일마다'],['어린이 채널',ch.status?.madeForKids?'예 (댓글 제한)':'일반'],['국가',sn.country||'미설정']].map(([l,r])=>`<div class="ir"><span class="ir-l">${l}</span><span>${r}</span></div>`).join('');
+
+  $('growth').innerHTML=[['조회/구독 비율',(views/(subs||1)).toFixed(1)+'x',views/subs>30?'g':'w'],['업로드 빈도',fd<=7?'주 1회 이상':'격주 이하',fd<=7?'g':'w'],['Top10 평균',fmt(avg)+'회',avg>subs*0.03?'g':'w']].map(([l,r,c])=>`<div class="ir"><span class="ir-l">${l}</span><span class="pill ${c}">${r}</span></div>`).join('');
+
+  $('vlist').innerHTML=t10.map((v,i)=>{const t=v.snippet?.title||'';return`<div class="vi"><div class="vi-rk">${i+1}</div><div class="vi-t" title="${t}">${t}</div><div class="vi-v">${fmt(v.statistics?.viewCount)}</div><div class="vi-d">${fmtD(v.snippet?.publishedAt||'')}</div></div>`;}).join('');
+  $('ch-desc').textContent=sn.description||'(설명 없음)';
+}
+
+// init
+document.addEventListener('DOMContentLoaded',()=>{
+  $('pw').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
+  if(getSess())runAgent();
+});
+</script>
+</body>
+</html>
